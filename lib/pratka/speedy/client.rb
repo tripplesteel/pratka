@@ -25,10 +25,10 @@ module Pratka
       STREET_ENDPOINT = "location/street"
       STREET_PARAMS = { site_id: :siteId, name: :name }.freeze
 
-      def initialize(username:, password:, language: Speedy.configuration.language, country_id: Speedy.configuration.country_id)
+      def initialize(username:, password:, language: nil, country_id: Speedy.configuration.country_id)
         @username = username
         @password = password
-        @language = language
+        @language = decide_language(language)
         @country_id = country_id
       end
 
@@ -100,6 +100,12 @@ module Pratka
 
       def http
         @http ||= HTTP.new(@username, @password, @language)
+      end
+
+      def decide_language(language)
+        return language if ["BG", "EN"].include?(language)
+
+        Speedy.configuration.language
       end
     end
   end

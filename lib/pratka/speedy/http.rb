@@ -5,7 +5,7 @@ require "net/http"
 
 module Pratka
   module Speedy
-    # Net::HTTP class to handle request to the Speedy API
+    # Net::HTTP class to handle requests to the Speedy API
     class HTTP
       def initialize(username, password, language)
         @username = username
@@ -18,8 +18,7 @@ module Pratka
         response = Net::HTTP.start(base_uri.host, base_uri.port, **connection_options) do |http|
           http.request(build_request(endpoint, data))
         end
-        body = response.body.to_s
-        body = body.force_encoding("UTF-8") unless body.nil?
+        body = (+response.body.to_s).force_encoding(Encoding::UTF_8)
 
         raise HTTPError.new(response.code.to_i, body) unless response.is_a?(Net::HTTPSuccess)
         return body unless json?(response)

@@ -96,6 +96,4 @@ RSpec.describe Pratka::Speedy::HTTP do
       expect(http.call("location/office", {})).to eq({ "name" => "София" })
     end
   end
-
-
 end

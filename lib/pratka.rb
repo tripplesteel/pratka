@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 require_relative "pratka/version"
+require_relative "pratka/error"
+require_relative "pratka/speedy"
 
 module Pratka
-  class Error < StandardError; end
   # Your code goes here...
 end

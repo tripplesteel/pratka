@@ -16,10 +16,10 @@ RSpec.describe Pratka::Speedy::Client do
 
   describe "#fetch_offices" do
     it "renames params to camelCase and adds the country" do
-      client.fetch_offices(site_id: 68_134, office_type: "APT")
+      client.fetch_offices(site_id: 68_134, office_type: ["APT"])
 
       expect(http).to have_received(:call)
-        .with("location/office", { siteId: 68_134, officeType: "APT", countryId: 100 })
+        .with("location/office", { siteId: 68_134, officeType: ["APT"], countryId: 100 })
     end
 
     it "rejects unknown params" do
@@ -28,9 +28,9 @@ RSpec.describe Pratka::Speedy::Client do
     end
   end
 
-  describe "#find_street" do
+  describe "#fetch_streets" do
     it "requires site_id" do
-      expect { client.find_street(name: "Vitosha") }
+      expect { client.fetch_streets(name: "Vitosha") }
         .to raise_error(ArgumentError, "Missing params: site_id")
     end
   end

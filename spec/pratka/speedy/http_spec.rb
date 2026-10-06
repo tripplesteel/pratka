@@ -42,6 +42,20 @@ RSpec.describe Pratka::Speedy::HTTP do
       .to raise_error(an_instance_of(Pratka::Speedy::HTTPError).and(having_attributes(status: 500, body: "oops")))
   end
 
+  it "puts the response body in the HTTPError message" do
+    stub_request(:post, url).to_return(status: 400, body: "Cannot deserialize\n at line 1")
+
+    expect { http.call("location/office", {}) }
+      .to raise_error(Pratka::Speedy::HTTPError, "Speedy returned HTTP 400: Cannot deserialize at line 1")
+  end
+
+  it "truncates a long body in the HTTPError message" do
+    stub_request(:post, url).to_return(status: 400, body: "x" * 300)
+
+    expect { http.call("location/office", {}) }
+      .to raise_error(Pratka::Speedy::HTTPError, "Speedy returned HTTP 400: #{"x" * 200}...")
+  end
+
   it "wraps timeouts" do
     stub_request(:post, url).to_timeout
 
@@ -71,7 +85,7 @@ RSpec.describe Pratka::Speedy::HTTP do
       stub_request(:post, url).to_return(status: 502)
 
       expect { http.call("location/office", {}) }
-        .to raise_error(an_instance_of(Pratka::Speedy::HTTPError).and(having_attributes(status: 502, body: "")))
+        .to raise_error(an_instance_of(Pratka::Speedy::HTTPError).and(having_attributes(status: 502, body: "", message: "Speedy returned HTTP 502")))
     end
 
     it "raises Error when a JSON response has no body" do

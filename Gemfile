@@ -15,4 +15,6 @@ group :development do
   gem "rubocop-rake"
   gem "rubocop-rspec"
   gem "ruby-lsp"
+
+  gem "webmock"
 end

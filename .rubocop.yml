@@ -29,3 +29,9 @@ Metrics/MethodLength:
 
 Metrics/CyclomaticComplexity:
   Enabled: false
+
+Style/WordArray:
+  Enabled: false
+
+Style/TernaryParentheses:
+  Enabled: false

@@ -14,7 +14,18 @@ module Pratka
       def initialize(status, body)
         @status = status
         @body = body
-        super("Speedy returned HTTP #{status}")
+        super(build_message)
+      end
+
+      private
+
+      # The body often holds the only explanation, e.g. a request parsing error on a 400.
+      def build_message
+        detail = @body.to_s.gsub(/\s+/, " ").strip
+        return "Speedy returned HTTP #{@status}" if detail.empty?
+
+        detail = "#{detail[0, 200]}..." if detail.length > 200
+        "Speedy returned HTTP #{@status}: #{detail}"
       end
     end
 

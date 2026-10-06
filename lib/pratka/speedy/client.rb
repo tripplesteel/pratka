@@ -32,20 +32,14 @@ module Pratka
         @country_id = country_id
       end
 
-      # Calls any Speedy endpoint, including ones without a wrapper method.
-      def call(endpoint, data = {})
-        http.call(endpoint, data)
-      end
-
       # Fetch all offices from Speedy
       # Allowed params:
-      # countryId - We automatically add to the params
-      # siteId - Site id. Limits the search scope in the set of offices for specified site. If omitted - all country offices are searched
-      # siteName - Filters the results by office site name prefix or part of it.
+      # site_id - Site id. Limits the search scope in the set of offices for specified site. If omitted - all country offices are searched
+      # site_name - Filters the results by office site name prefix or part of it.
       # name - Search term for office name. Filters the results by office name prefix or part of site name.
       # limit - The number of records to return in response. All records are returned if this parameter is omitted
-      # officeType - enum ["OFFICE", "APT"]
-      # officeFeatures - enum ["CARD_PAYMENT", "CASH_PAYMENT", "DROP_OFF", "PICK_UP", "CARGO_TYPE_PARCEL", "CARGO_TYPE_PALLET", "CARGO_TYPE_TYRE"][]
+      # office_type - array of ["OFFICE", "APT"]
+      # office_features - array of ["CARD_PAYMENT", "CASH_PAYMENT", "DROP_OFF", "PICK_UP", "CARGO_TYPE_PARCEL", "CARGO_TYPE_PALLET", "CARGO_TYPE_TYRE"][]
       # Returns the parsed JSON response.
       def fetch_offices(**options)
         call(OFFICES_ENDPOINT, map_params(options, OFFICES_PARAMS).merge(countryId: @country_id))
@@ -67,7 +61,7 @@ module Pratka
       # Allowed params:
       # site_id - Mandatory
       # name - Search term for complex name. Filters the results by complex name prefix or part of complex name.
-      def find_complex(**options)
+      def fetch_complexes(**options)
         call(COMPLEX_ENDPOINT, map_params(options, COMPLEX_PARAMS, required: [:site_id]))
       end
 
@@ -75,11 +69,15 @@ module Pratka
       # Allowed params:
       # site_id - Mandatory
       # name - Search term for street name. Filters the results by street name prefix or part of street name.
-      def find_street(**options)
+      def fetch_streets(**options)
         call(STREET_ENDPOINT, map_params(options, STREET_PARAMS, required: [:site_id]))
       end
 
       private
+
+      def call(endpoint, data = {})
+        http.call(endpoint, data)
+      end
 
       def map_params(options, mapping, required: [])
         unknown = options.keys - mapping.keys

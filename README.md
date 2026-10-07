@@ -252,6 +252,49 @@ If the parcels don't exist in Speedy, `print_label` raises `Pratka::Speedy::Erro
 
 If you send empty parcels, `print_label` raises `ArgumentError` with the message `Missing params: parcels`
 
+#### Fetch payment details
+
+```ruby
+client.fetch_payment_details(from_date: Time.new(2026, 10, 1), to_date: Time.now, include_details: true)
+```
+
+Allowed options:
+- `from_date` (Mandatory) - Start of the period
+- `to_date` (Mandatory) - End of the period
+- `include_details` - Include per-shipment payout details. Default one is `false`
+
+Dates accept `Date`, `DateTime`, `Time` or a string. The client sends `Date`, `DateTime` and `Time` as `yyyy-MM-dd'T'HH:mm:ssZ`, for example `"2026-10-01T09:00:00+0300"`. A `Date` has no time or zone, so it becomes midnight UTC. Strings are sent as they are
+
+Returns the parsed JSON response. `details` is filled only when `include_details` is `true`
+Example response:
+
+```ruby
+{"payouts" =>
+  [{"date" => "2026-10-03",
+    "docId" => 123456789,
+    "docType" => "POSTAL_MONEY_TRANSFER", # or "CASH"
+    "paymentType" => "BANK",              # or "CASH"
+    "payee" => "Example Ltd",
+    "currency" => "BGN",
+    "amount" => 59.9,
+    "details" =>
+     [{"lineNo" => 1,
+       "shipmentId" => "61234567890",
+       "pickupDate" => "2026-09-30",
+       "primaryShipmentPickupDate" => nil,
+       "deliveryDate" => "2026-10-01",
+       "sender" => "Example Ltd",
+       "recipient" => "Ivan Ivanov",
+       "note" => "",
+       "ref1" => "ORDER-1001",
+       "ref2" => "",
+       "currency" => "BGN",
+       "order" => 1001,
+       "amount" => 59.9}]
+  }]
+}
+```
+
 ### Errors
 
 Every network and API failure raises a subclass of `Pratka::Speedy::Error`, which inherits from `Pratka::Error`

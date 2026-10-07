@@ -52,6 +52,15 @@ module Pratka
         shipment_note: :shipmentNote
       }.freeze
 
+      CALCULATION_ENDPOINT = "calculate"
+      CALCULATION_PARAMS = {
+        sender: :sender,
+        recipient: :recipient,
+        service: :service,
+        content: :content,
+        payment: :payment
+      }.freeze
+
       def initialize(username:, password:, language: nil, country_id: Speedy.configuration.country_id)
         @username = username
         @password = password
@@ -141,6 +150,19 @@ module Pratka
       # shipment_note - String - Customer’s note associated with the shipment
       def create_shipment(**options)
         call(CREATE_SHIPMENT_ENDPOINT, map_params(options, SHIPMENT_PARAMS, required: %i[recipient service content payment]))
+      end
+
+      # Calculate shipment price and delivery deadline for one or more services
+      # [Calculation Request (CalculationRequest)](https://api.speedy.bg/api/docs/#href-calculation-req)
+      # Allowed params:
+      # sender - CalculationSender - Defines the pickup place. If not specified, the logged user's location is used
+      # recipient (Mandatory) - CalculationRecipient - Defines the delivery place
+      # service (Mandatory) - CalculationService - Defines the service ids to price and the pickup date
+      # content (Mandatory) - CalculationContent - Defines number of parcels, weight, etc
+      # payment (Mandatory) - ShipmentPayment - Defines who-pays-what in shipment
+      # Returns one calculation per service id. Each calculation carries its own error if Speedy can't price that service
+      def calculate(**options)
+        call(CALCULATION_ENDPOINT, map_params(options, CALCULATION_PARAMS, required: %i[recipient service content payment]))
       end
 
       private

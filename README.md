@@ -341,6 +341,50 @@ Example response:
 }
 ```
 
+#### Calculate
+
+```ruby
+client.calculate(
+  recipient: { privatePerson: true, pickupOfficeId: 77 },
+  service: { serviceIds: [505, 412], autoAdjustPickupDate: true },
+  content: { parcelsCount: 1, totalWeight: 0.6 },
+  payment: { courierServicePayer: "RECIPIENT" }
+)
+```
+
+Allowed options:
+- `recipient` (Mandatory) - [CalculationRecipient](https://api.speedy.bg/api/docs/#href-ds-calculation-recipient). The delivery place
+- `service` (Mandatory) - [CalculationService](https://api.speedy.bg/api/docs/#href-ds-calculation-service). The service IDs to price, the pickup date and additional services
+- `content` (Mandatory) - [CalculationContent](https://api.speedy.bg/api/docs/#href-ds-calculation-content). Parcel count and weight, or a list of parcels
+- `payment` (Mandatory) - [ShipmentPayment](https://api.speedy.bg/api/docs/#href-ds-shipment-payment). Who pays for what
+- `sender` - [CalculationSender](https://api.speedy.bg/api/docs/#href-ds-calculation-sender). The pickup place. If omitted, the logged-in user's location is used
+
+Returns the parsed JSON response with one calculation per service ID. Speedy returns `price` only if your account can view shipment amounts, and `deliveryDeadline` only when it knows one
+
+A service Speedy can't price for this destination comes back with its own `error` object instead of a price. `calculate` doesn't raise for it, so check each calculation
+
+Example response:
+
+```ruby
+{"calculations" =>
+  [{"serviceId" => 505,
+    "additionalServices" => {},
+    "price" =>
+     {"amount" => 5.5,
+      "vat" => 1.1,
+      "total" => 6.6,
+      "currency" => "BGN"},
+    "pickupDate" => "2026-10-07",
+    "deliveryDeadline" => "2026-10-08T19:00:00+03:00"},
+   {"serviceId" => 412,
+    "error" =>
+     {"context" => "service.serviceIds",
+      "message" => "Service is not allowed for this destination",
+      "id" => "EE-1234",
+      "code" => 1}}]
+}
+```
+
 ### Errors
 
 Every network and API failure raises a subclass of `Pratka::Speedy::Error`, which inherits from `Pratka::Error`

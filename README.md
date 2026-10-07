@@ -11,10 +11,14 @@ I built this because I mainly work on Ruby/JRuby on Rails e-shops that integrate
 
 Requires Ruby 3.3 or newer
 
-Until the first release, install from GitHub:
-
 ```ruby
-gem "pratka", github: "tripplesteel/pratka"
+gem "pratka"
+```
+
+or
+
+```bash
+bundle add pratka.
 ```
 
 ## Speedy

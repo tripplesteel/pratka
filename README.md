@@ -7,7 +7,7 @@ Ruby client for Bulgarian courier APIs. Supported couriers:
 
 ## Installation
 
-Requires Ruby 3.4 or newer
+Requires Ruby 3.3 or newer
 
 Until the first release, install from GitHub:
 

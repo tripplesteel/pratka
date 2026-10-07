@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     pratka (0.1.0)
-      csv
+      csv (~> 3.3)
 
 GEM
   remote: https://rubygems.org/

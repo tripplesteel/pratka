@@ -18,7 +18,7 @@ gem "pratka"
 or
 
 ```bash
-bundle add pratka.
+bundle add pratka
 ```
 
 ## Speedy

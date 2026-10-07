@@ -389,6 +389,36 @@ Example response:
 }
 ```
 
+#### Track
+
+```ruby
+client.track(parcels: [{ id: "299999990" }, { ref: "ORDER-1001" }], last_operation_only: true)
+```
+
+Allowed options:
+- `parcels` (Mandatory) - Array of [TrackShipmentParcelRef](https://api.speedy.bg/api/docs/#href-ds-track-shipment-parcel-ref), at most 10. Each parcel needs one of `id`, `ref`, `fullBarcode` or `externalCarrierParcelNumber`. `ref` matches the `ref1` and `ref2` fields of a parcel or shipment
+- `last_operation_only` - Return only the latest operation per parcel. Defaults to `false`
+
+Returns the parsed JSON response with one tracked parcel per matched parcel. A `ref` can match up to 10 parcels. Operation codes are listed in [Appendix 1](https://api.speedy.bg/api/docs/#href-appendix1-track-and-trace-codes) of the Speedy docs
+
+A parcel Speedy can't find comes back with its own `error` object instead of operations. `track` doesn't raise for it, so check each parcel
+
+Speedy asks clients to send at most 10 parcels per request and plans to enforce that limit. `track` enforces it already, so if you send more than 10 parcels it raises `ArgumentError` with the message `Speedy tracks at most 10 parcels per call`. Split larger lists into batches, for example with `each_slice(10)`
+
+Example response:
+
+```ruby
+{"parcels" =>
+  [{"parcelId" => "299999990",
+    "operations" =>
+     [{"dateTime" => "2026-10-08T11:42:10+0300",
+       "operationCode" => -14,
+       "description" => "Delivered",
+       "place" => "SOFIA",
+       "consignee" => "Ivan Ivanov"}]}]
+}
+```
+
 ### Errors
 
 Every network and API failure raises a subclass of `Pratka::Speedy::Error`, which inherits from `Pratka::Error`

@@ -13,6 +13,7 @@ Initial release, with Speedy as the first supported courier.
 - `create_shipment`
 - `print_label` returns raw PDF or ZPL bytes
 - `fetch_payment_details` returns shipment payouts for a date range
+- `track` returns the operation history for up to 10 parcels
 - Error classes under `Pratka::Speedy`: `TimeoutError`, `ConnectionError`, `HTTPError` (with `status` and `body`), `APIError` (with `code`, `context`, `id`)
 - Validation of required params, which treats blank values as missing
 - Supports Ruby 3.3+ and JRuby

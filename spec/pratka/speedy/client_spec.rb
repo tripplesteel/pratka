@@ -131,4 +131,47 @@ RSpec.describe Pratka::Speedy::Client do
       expect(http).not_to have_received(:call)
     end
   end
+
+  describe "#create_shipment" do
+    let(:shipment) do
+      {
+        recipient: { phone1: { number: "0899445566" }, clientName: "Ivan Ivanov", pickupOfficeId: 77 },
+        service: { serviceId: 505, autoAdjustPickupDate: true },
+        content: { parcelsCount: 1, totalWeight: 0.6, contents: "Phone", package: "BOX" },
+        payment: { courierServicePayer: "RECIPIENT" }
+      }
+    end
+
+    it "sends camelCase params to the shipment endpoint and keeps nested hashes as they are" do
+      sender = { clientId: 1_234_567_890 }
+
+      client.create_shipment(sender: sender, shipment_note: "Fragile", **shipment)
+
+      expect(http).to have_received(:call)
+        .with("shipment", { sender: sender, shipmentNote: "Fragile", **shipment })
+    end
+
+    it "returns the parsed response" do
+      response = { "id" => "299999990", "parcels" => [{ "seqNo" => 1, "id" => "299999990" }] }
+      allow(http).to receive(:call).and_return(response)
+
+      expect(client.create_shipment(**shipment)).to eq(response)
+    end
+
+    it "requires recipient, service, content and payment without calling Speedy", :aggregate_failures do
+      expect { client.create_shipment(shipment_note: "Fragile") }
+        .to raise_error(ArgumentError, "Missing params: recipient, service, content, payment")
+      expect(http).not_to have_received(:call)
+    end
+
+    it "treats an empty nested hash as missing" do
+      expect { client.create_shipment(**shipment, payment: {}) }
+        .to raise_error(ArgumentError, "Missing params: payment")
+    end
+
+    it "rejects unknown params" do
+      expect { client.create_shipment(**shipment, ref1: "ORDER-1001") }
+        .to raise_error(ArgumentError, "Unknown params: ref1")
+    end
+  end
 end

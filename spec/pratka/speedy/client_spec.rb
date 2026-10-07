@@ -174,4 +174,46 @@ RSpec.describe Pratka::Speedy::Client do
         .to raise_error(ArgumentError, "Unknown params: ref1")
     end
   end
+
+  describe "#calculate" do
+    let(:calculation) do
+      {
+        recipient: { privatePerson: true, pickupOfficeId: 77 },
+        service: { serviceIds: [505, 412], autoAdjustPickupDate: true },
+        content: { parcelsCount: 1, totalWeight: 0.6 },
+        payment: { courierServicePayer: "RECIPIENT" }
+      }
+    end
+
+    it "sends params to the calculate endpoint and keeps nested hashes as they are" do
+      sender = { privatePerson: false, dropoffOfficeId: 1 }
+
+      client.calculate(sender: sender, **calculation)
+
+      expect(http).to have_received(:call).with("calculate", { sender: sender, **calculation })
+    end
+
+    it "returns the parsed response" do
+      response = { "calculations" => [{ "serviceId" => 505, "pickupDate" => "2026-10-07" }] }
+      allow(http).to receive(:call).and_return(response)
+
+      expect(client.calculate(**calculation)).to eq(response)
+    end
+
+    it "requires recipient, service, content and payment without calling Speedy", :aggregate_failures do
+      expect { client.calculate(sender: { dropoffOfficeId: 1 }) }
+        .to raise_error(ArgumentError, "Missing params: recipient, service, content, payment")
+      expect(http).not_to have_received(:call)
+    end
+
+    it "treats an empty nested hash as missing" do
+      expect { client.calculate(**calculation, service: {}) }
+        .to raise_error(ArgumentError, "Missing params: service")
+    end
+
+    it "rejects shipment-only params" do
+      expect { client.calculate(**calculation, shipment_note: "Fragile") }
+        .to raise_error(ArgumentError, "Unknown params: shipment_note")
+    end
+  end
 end

@@ -295,6 +295,47 @@ Example response:
 }
 ```
 
+#### Create shipment
+
+```ruby
+client.create_shipment(
+  recipient: {
+    phone1: { number: "0899445566" },
+    clientName: "Ivan Ivanov",
+    privatePerson: true,
+    pickupOfficeId: 77
+  },
+  service: { serviceId: 505, autoAdjustPickupDate: true },
+  content: { parcelsCount: 1, totalWeight: 0.6, contents: "Mobile phone", package: "BOX" },
+  payment: { courierServicePayer: "RECIPIENT" },
+  shipment_note: "Fragile"
+)
+```
+
+Allowed options:
+- `recipient` (Mandatory) - [ShipmentRecipient](https://api.speedy.bg/api/docs/#href-ds-shipment-recipient). The recipient and the delivery place
+- `service` (Mandatory) - [ShipmentService](https://api.speedy.bg/api/docs/#href-ds-shipment-service). The service level, pickup date and additional services
+- `content` (Mandatory) - [ShipmentContent](https://api.speedy.bg/api/docs/#href-ds-shipment-content). Parcel count, weight, size and contents
+- `payment` (Mandatory) - [ShipmentPayment](https://api.speedy.bg/api/docs/#href-ds-shipment-payment). Who pays for what
+- `sender` - [ShipmentSender](https://api.speedy.bg/api/docs/#href-ds-shipment-sender). The sender and the pickup place. If omitted, the logged-in user is the sender
+- `shipment_note` - Customer's note for the shipment
+
+Returns the parsed JSON response. Use the parcel `id` values with `print_label`. Speedy returns `price` only if your account can view shipment amounts, and `deliveryDeadline` only when it knows one
+Example response:
+
+```ruby
+{"id" => "299999990",
+ "parcels" => [{"seqNo" => 1, "id" => "299999990"}],
+ "pickupDate" => "2026-10-07",
+ "price" =>
+  {"amount" => 5.5,
+   "vat" => 1.1,
+   "total" => 6.6,
+   "currency" => "BGN"},
+ "deliveryDeadline" => "2026-10-08T19:00:00+03:00"
+}
+```
+
 ### Errors
 
 Every network and API failure raises a subclass of `Pratka::Speedy::Error`, which inherits from `Pratka::Error`

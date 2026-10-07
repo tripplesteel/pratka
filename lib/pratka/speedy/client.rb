@@ -42,6 +42,16 @@ module Pratka
         include_details: :includeDetails
       }.freeze
 
+      CREATE_SHIPMENT_ENDPOINT = "shipment"
+      SHIPMENT_PARAMS = {
+        sender: :sender,
+        recipient: :recipient,
+        service: :service,
+        content: :content,
+        payment: :payment,
+        shipment_note: :shipmentNote
+      }.freeze
+
       def initialize(username:, password:, language: nil, country_id: Speedy.configuration.country_id)
         @username = username
         @password = password
@@ -118,6 +128,19 @@ module Pratka
         params[:toDate] = format_datetime(params[:toDate])
 
         call(PAYMENTS_ENDPOINT, params)
+      end
+
+      # Create shipment
+      # [Create Shipment Request (CreateShipmentRequest)](https://api.speedy.bg/api/docs/#href-create-shipment-req)
+      # Allowed params:
+      # sender - ShipmentSender - Defines the sender of the shipment and shipment's pickup place. If not specified, the logged user is considered as a sender
+      # recipient (Mandatory) - ShipmentRecipient - Defines the recipient of the shipment and shipment’s delivery place
+      # service (Mandatory) - ShipmentService - Defines shipment service level agreement
+      # content (Mandatory) - ShipmentContent - Defines shipment’s content - number of parcels, weight, size, etc
+      # payment (Mandatory) - ShipmentPayment - Defines who-pays-what in shipment and other payment parameters
+      # shipment_note - String - Customer’s note associated with the shipment
+      def create_shipment(**options)
+        call(CREATE_SHIPMENT_ENDPOINT, map_params(options, SHIPMENT_PARAMS, required: %i[recipient service content payment]))
       end
 
       private

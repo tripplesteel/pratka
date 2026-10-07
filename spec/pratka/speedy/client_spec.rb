@@ -33,6 +33,13 @@ RSpec.describe Pratka::Speedy::Client do
       expect { client.fetch_streets(name: "Vitosha") }
         .to raise_error(ArgumentError, "Missing params: site_id")
     end
+
+    it "treats blank values as missing", :aggregate_failures do
+      ["", "  ", [], {}].each do |blank|
+        expect { client.fetch_streets(site_id: blank) }
+          .to raise_error(ArgumentError, "Missing params: site_id")
+      end
+    end
   end
 
   describe "#fetch_cities" do
@@ -46,6 +53,48 @@ RSpec.describe Pratka::Speedy::Client do
 
     it "raises when the response is not CSV" do
       expect { client.fetch_cities }.to raise_error(Pratka::Speedy::Error, /Expected CSV/)
+    end
+  end
+
+  describe "#print_label" do
+    let(:parcels) { [{ parcel: { id: "123" } }] }
+
+    # Real PDFs open with a binary comment line. HTTP hands it back labeled UTF-8
+
+    let(:pdf) { "%PDF-1.5\n%\xE2\xE3\xCF\xD3\n" }
+    let(:print_options) { { format: "pdf", printer_name: "Zebra", dpi: "dpi300", sender_copy: "ON_SAME_PAGE" } }
+    let(:speedy_options) do
+      { format: "pdf", printerName: "Zebra", dpi: "dpi300", additionalWaybillSenderCopy: "ON_SAME_PAGE" }
+    end
+
+    before { allow(http).to receive(:call).and_return(pdf) }
+
+    it "sends camelCase params to the print endpoint" do
+      client.print_label(paper_size: "A6", parcels: parcels, **print_options)
+
+      expect(http).to have_received(:call)
+        .with("print", { paperSize: "A6", parcels: parcels, **speedy_options })
+    end
+
+    it "returns the label as binary bytes", :aggregate_failures do
+      label = client.print_label(paper_size: "A6", parcels: parcels)
+
+      expect(label).to eq(pdf.b)
+      expect(label.encoding).to eq(Encoding::BINARY)
+      expect(label).to be_valid_encoding
+    end
+
+    it "raises when Speedy returns an empty label" do
+      allow(http).to receive(:call).and_return("")
+
+      expect { client.print_label(paper_size: "A6", parcels: parcels) }
+        .to raise_error(Pratka::Speedy::Error, /empty label/)
+    end
+
+    it "rejects empty parcels without calling Speedy", :aggregate_failures do
+      expect { client.print_label(paper_size: "A6", parcels: []) }
+        .to raise_error(ArgumentError, "Missing params: parcels")
+      expect(http).not_to have_received(:call)
     end
   end
 end

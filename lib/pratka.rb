@@ -6,5 +6,4 @@ require_relative "pratka/error"
 require_relative "pratka/speedy"
 
 module Pratka
-  # Your code goes here...
 end

@@ -5,6 +5,8 @@ Ruby client for Bulgarian courier APIs. Supported couriers:
 - [Econt](https://www.econt.com/developers/soap-json-api.html), [Econt API Models](https://ee.econt.com/services/Shipments/) (Work in progress)
 - [Speedy](https://api.speedy.bg/api/docs/)
 
+I built this because I mainly work on Ruby/JRuby on Rails e-shops that integrate with Speedy and Econt, and I kept copying the same API code from project to project. With Pratka, each project can call the courier APIs directly. I'm starting with the endpoints we use most. If you need one that isn't implemented yet, feel free to [open an issue](https://github.com/tripplesteel/pratka/issues).
+
 ## Installation
 
 Requires Ruby 3.3 or newer
@@ -18,7 +20,7 @@ gem "pratka", github: "tripplesteel/pratka"
 ## Speedy
 
 ### Setup
-The configuration options are `base_url`, `language`, `country_id`, `read_timeout` and `open_timeout`. Set them up like this:
+`Pratka::Speedy` works without any configuration. Add the gem, create a `Pratka::Speedy::Client` with your credentials, and you're ready. To override the defaults, set any of `base_url`, `language`, `country_id`, `read_timeout` and `open_timeout`:
 
 ```ruby
 Pratka::Speedy.configure do |c|
@@ -47,14 +49,14 @@ Credentials go on the client, not the global configuration, so you can run sever
 
 #### Fetch Speedy offices
 
-Its scoped automatically to client's country
+It's scoped automatically to client's country
 
 ```ruby
 client.fetch_offices
 ```
 
 Allowed options:
-- `site_id` - Site id. Limits the search scope in the set of offices for specified site. If omitted - all country offices are searched
+- `site_id` - Site ID. Limits the search scope in the set of offices for specified site. If omitted - all country offices are searched
 - `site_name` - Filters the results by office site name prefix or part of it
 - `name` - Search term for office name. Filters the results by office name prefix or part of site name
 - `limit` - The number of records to return in response. All records are returned if this parameter is omitted
@@ -190,10 +192,11 @@ client.fetch_complexes(site_id: 881)
 ```
 
 Allowed options:
-- `site_id` (Mandatory) - Site id
+- `site_id` (Mandatory) - Site ID
 - `name` - Search term for complex name. Filters the results by complex name prefix or part of complex name
 
 Returns the parsed JSON response
+
 Example response:
 
 ```ruby
@@ -213,10 +216,11 @@ client.fetch_streets(site_id: 36124)
 ```
 
 Allowed options:
-- `site_id` (Mandatory) - Site id
+- `site_id` (Mandatory) - Site ID
 - `name` - Filters the results by street name
 
 Returns the parsed JSON response
+
 Example response:
 
 ```ruby
@@ -240,11 +244,11 @@ client.print_label(paper_size: "A4", parcels: [{ parcel: { id: "123" } }])
 
 Allowed options:
 - `paper_size` (Mandatory) - Paper size of the label
-- `parcels` (Mandatory) - Array of hashes. Example: [ { "parcel" => { id: 'speedy_tracking_number' } } ]
-- `format` - Allowed values are `pdf` or `zpl`. Default one is `pdf`
+- `parcels` (Mandatory) - Array of hashes. Example: [ { parcel: { id: "speedy_tracking_number" } } ]
+- `format` - Allowed values are `pdf` or `zpl`. Defaults to `pdf`
 - `printer_name` - Name of the printer
-- `dpi` - Allowed values are `dpi203` or `dpi300`. Default one is `dpi203`
-- `sender_copy` - Allowed values are `NONE`, `ON_SAME_PAGE`, `ON_SINGLE_PAGE`. Default one is `NONE`
+- `dpi` - Allowed values are `dpi203` or `dpi300`. Defaults to `dpi203`
+- `sender_copy` - Allowed values are `NONE`, `ON_SAME_PAGE`, `ON_SINGLE_PAGE`. Defaults to `NONE`
 
 Returns raw PDF or ZPL bytes if the request is successful and the parcel exists
 
@@ -261,11 +265,12 @@ client.fetch_payment_details(from_date: Time.new(2026, 10, 1), to_date: Time.now
 Allowed options:
 - `from_date` (Mandatory) - Start of the period
 - `to_date` (Mandatory) - End of the period
-- `include_details` - Include per-shipment payout details. Default one is `false`
+- `include_details` - Include per-shipment payout details. Defaults to `false`
 
 Dates accept `Date`, `DateTime`, `Time` or a string. The client sends `Date`, `DateTime` and `Time` as `yyyy-MM-dd'T'HH:mm:ssZ`, for example `"2026-10-01T09:00:00+0300"`. A `Date` has no time or zone, so it becomes midnight UTC. Strings are sent as they are
 
 Returns the parsed JSON response. `details` is filled only when `include_details` is `true`
+
 Example response:
 
 ```ruby

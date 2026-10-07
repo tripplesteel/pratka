@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "date"
+
 RSpec.describe Pratka::Speedy::Client do
   subject(:client) { described_class.new(username: "user", password: "secret") }
 
@@ -94,6 +96,38 @@ RSpec.describe Pratka::Speedy::Client do
     it "rejects empty parcels without calling Speedy", :aggregate_failures do
       expect { client.print_label(paper_size: "A6", parcels: []) }
         .to raise_error(ArgumentError, "Missing params: parcels")
+      expect(http).not_to have_received(:call)
+    end
+  end
+
+  describe "#fetch_payment_details" do
+    it "sends camelCase params to the payments endpoint" do
+      client.fetch_payment_details(from_date: "2026-10-01T00:00:00+0300", to_date: "2026-10-07T23:59:59+0300",
+                                   include_details: true)
+
+      expect(http).to have_received(:call)
+        .with("payments", { fromDate: "2026-10-01T00:00:00+0300", toDate: "2026-10-07T23:59:59+0300",
+                            includeDetails: true })
+    end
+
+    it "formats DateTime and Time with their offset" do
+      client.fetch_payment_details(from_date: DateTime.new(2026, 10, 1, 9, 0, 0, "+03:00"),
+                                   to_date: Time.new(2026, 10, 7, 18, 30, 15, "+03:00"))
+
+      expect(http).to have_received(:call)
+        .with("payments", { fromDate: "2026-10-01T09:00:00+0300", toDate: "2026-10-07T18:30:15+0300" })
+    end
+
+    it "formats Date as midnight UTC" do
+      client.fetch_payment_details(from_date: Date.new(2026, 10, 1), to_date: Date.new(2026, 10, 7))
+
+      expect(http).to have_received(:call)
+        .with("payments", { fromDate: "2026-10-01T00:00:00+0000", toDate: "2026-10-07T00:00:00+0000" })
+    end
+
+    it "requires from_date and to_date without calling Speedy", :aggregate_failures do
+      expect { client.fetch_payment_details(include_details: true) }
+        .to raise_error(ArgumentError, "Missing params: from_date, to_date")
       expect(http).not_to have_received(:call)
     end
   end

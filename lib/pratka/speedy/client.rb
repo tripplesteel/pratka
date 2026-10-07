@@ -35,6 +35,13 @@ module Pratka
         parcels: :parcels
       }.freeze
 
+      PAYMENTS_ENDPOINT = "payments"
+      PAYMENTS_PARAMS = {
+        from_date: :fromDate,
+        to_date: :toDate,
+        include_details: :includeDetails
+      }.freeze
+
       def initialize(username:, password:, language: nil, country_id: Speedy.configuration.country_id)
         @username = username
         @password = password
@@ -100,6 +107,19 @@ module Pratka
         label.b
       end
 
+      # Fetch shipment payouts for a period
+      # Allowed params:
+      # from_date - (Mandatory) Date, DateTime, Time or a "yyyy-MM-ddTHH:mm:ss+zzzz" string
+      # to_date - (Mandatory) Date, DateTime, Time or a "yyyy-MM-ddTHH:mm:ss+zzzz" string
+      # include_details - Include per-shipment payout details. Default one is false
+      def fetch_payment_details(**options)
+        params = map_params(options, PAYMENTS_PARAMS, required: %i[from_date to_date])
+        params[:fromDate] = format_datetime(params[:fromDate])
+        params[:toDate] = format_datetime(params[:toDate])
+
+        call(PAYMENTS_ENDPOINT, params)
+      end
+
       private
 
       def call(endpoint, data = {})
@@ -119,6 +139,11 @@ module Pratka
       def blank?(value)
         value = value.strip if value.respond_to?(:strip)
         value.nil? || (value.respond_to?(:empty?) && value.empty?)
+      end
+
+      # Speedy wants yyyy-MM-dd'T'HH:mm:ssZ, where Z is an offset like +0300. A Date becomes midnight UTC
+      def format_datetime(value)
+        value.respond_to?(:strftime) ? value.strftime("%Y-%m-%dT%H:%M:%S%z") : value
       end
 
       def fetch_csv(endpoint)

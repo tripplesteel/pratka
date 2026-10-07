@@ -13,7 +13,7 @@ module Pratka
         @language = language
       end
 
-      # Each call opens a fresh connection and closes it when the block exits.
+      # Each call opens a fresh connection and closes it when the block exits
       def call(endpoint, data)
         response = Net::HTTP.start(base_uri.host, base_uri.port, **connection_options) do |http|
           http.request(build_request(endpoint, data))

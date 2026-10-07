@@ -7,7 +7,7 @@ Ruby client for Bulgarian courier APIs. Supported couriers:
 
 ## Installation
 
-Requires Ruby 3.4 or newer.
+Requires Ruby 3.4 or newer
 
 Until the first release, install from GitHub:
 
@@ -41,13 +41,13 @@ client = Pratka::Speedy::Client.new(
 )
 ```
 
-Credentials go on the client, not the global configuration, so you can run several Speedy accounts side by side.
+Credentials go on the client, not the global configuration, so you can run several Speedy accounts side by side
 
 ### API methods
 
 #### Fetch Speedy offices
 
-Its scoped automatically to client's country.
+Its scoped automatically to client's country
 
 ```ruby
 client.fetch_offices
@@ -61,7 +61,7 @@ Allowed options:
 - `office_type` - array of ["OFFICE", "APT"]
 - `office_features` - array of ["CARD_PAYMENT", "CASH_PAYMENT", "DROP_OFF", "PICK_UP", "CARGO_TYPE_PARCEL", "CARGO_TYPE_PALLET", "CARGO_TYPE_TYRE"]
 
-Returns the parsed JSON response. Values keep their JSON types, so IDs are `Integer`, coordinates are `Float` and flags are `true`/`false`.
+Returns the parsed JSON response. Values keep their JSON types, so IDs are `Integer`, coordinates are `Float` and flags are `true`/`false`
 
 Example response:
 
@@ -127,9 +127,9 @@ Example response:
 client.fetch_cities
 ```
 
-Returns the cities for the client's `country_id`, which defaults to the configured `country_id` (100, Bulgaria). Use a client with a different `country_id` to fetch another country's cities.
+Returns the cities for the client's `country_id`, which defaults to the configured `country_id` (100, Bulgaria). Use a client with a different `country_id` to fetch another country's cities
 
-Speedy serves this endpoint as CSV, so every value is a `String` and empty fields are `nil`. Convert IDs before comparing them with JSON responses. For example, an office's `"siteId" => 56784` matches a city's `"id" => "56784"`.
+Speedy serves this endpoint as CSV, so every value is a `String` and empty fields are `nil`. Convert IDs before comparing them with JSON responses. For example, an office's `"siteId" => 56784` matches a city's `"id" => "56784"`
 
 Example response:
 
@@ -160,7 +160,7 @@ Example response:
 client.fetch_countries
 ```
 
-Speedy serves this endpoint as CSV, so every value is a `String` and empty fields are `nil`. Booleans come back as `"true"` and `"false"`.
+Speedy serves this endpoint as CSV, so every value is a `String` and empty fields are `nil`. Booleans come back as `"true"` and `"false"`
 
 Example response:
 
@@ -191,9 +191,9 @@ client.fetch_complexes(site_id: 881)
 
 Allowed options:
 - `site_id` (Mandatory) - Site id
-- `name` - Search term for complex name. Filters the results by complex name prefix or part of complex name.
+- `name` - Search term for complex name. Filters the results by complex name prefix or part of complex name
 
-Returns the parsed JSON response.
+Returns the parsed JSON response
 Example response:
 
 ```ruby
@@ -213,10 +213,10 @@ client.fetch_streets(site_id: 36124)
 ```
 
 Allowed options:
-- `site_id` (Mandatory) - Site id.
-- `name` - Search term for complex name. Filters the results by complex name prefix or part of complex name.
+- `site_id` (Mandatory) - Site id
+- `name` - Filters the results by street name
 
-Returns the parsed JSON response.
+Returns the parsed JSON response
 Example response:
 
 ```ruby
@@ -232,9 +232,29 @@ Example response:
 }
 ```
 
+#### Print label
+
+```ruby
+client.print_label(paper_size: "A4", parcels: [{ parcel: { id: "123" } }])
+```
+
+Allowed options:
+- `paper_size` (Mandatory) - Paper size of the label
+- `parcels` (Mandatory) - Array of hashes. Example: [ { "parcel" => { id: 'speedy_tracking_number' } } ]
+- `format` - Allowed values are `pdf` or `zpl`. Default one is `pdf`
+- `printer_name` - Name of the printer
+- `dpi` - Allowed values are `dpi203` or `dpi300`. Default one is `dpi203`
+- `sender_copy` - Allowed values are `NONE`, `ON_SAME_PAGE`, `ON_SINGLE_PAGE`. Default one is `NONE`
+
+Returns raw PDF or ZPL bytes if the request is successful and the parcel exists
+
+If the parcels don't exist in Speedy, `print_label` raises `Pratka::Speedy::Error` with the message `Speedy returned an empty label; check the parcel IDs`
+
+If you send empty parcels, `print_label` raises `ArgumentError` with the message `Missing params: parcels`
+
 ### Errors
 
-Every network and API failure raises a subclass of `Pratka::Speedy::Error`, which inherits from `Pratka::Error`.
+Every network and API failure raises a subclass of `Pratka::Speedy::Error`, which inherits from `Pratka::Error`
 
 | Error | Raised when | Extra attributes |
 | --- | --- | --- |
@@ -244,7 +264,7 @@ Every network and API failure raises a subclass of `Pratka::Speedy::Error`, whic
 | `Pratka::Speedy::APIError` | Speedy returns 2xx with an `error` object in the body | `code`, `context`, `id` |
 | `Pratka::Speedy::Error` | The response is malformed, has invalid JSON, or has an unexpected format | |
 
-Bad arguments raise `ArgumentError` before any request is sent, for example an unknown option or a missing `site_id`.
+Bad arguments raise `ArgumentError` before any request is sent, for example an unknown option or a missing `site_id`
 
 ```ruby
 begin
@@ -266,7 +286,7 @@ bundle exec rake   # run specs and RuboCop
 bin/console        # IRB session with the gem loaded
 ```
 
-To release a new version, update `lib/pratka/version.rb` and `CHANGELOG.md`, then run `bundle exec rake release`. That task tags the commit, pushes the tag and publishes the gem to [rubygems.org](https://rubygems.org).
+To release a new version, update `lib/pratka/version.rb` and `CHANGELOG.md`, then run `bundle exec rake release`. That task tags the commit, pushes the tag and publishes the gem to [rubygems.org](https://rubygems.org)
 
 ## License
 

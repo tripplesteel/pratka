@@ -19,7 +19,7 @@ module Pratka
 
       private
 
-      # The body often holds the only explanation, e.g. a request parsing error on a 400.
+      # The body often holds the only explanation, e.g. a request parsing error on a 400
       def build_message
         detail = @body.to_s.gsub(/\s+/, " ").strip
         return "Speedy returned HTTP #{@status}" if detail.empty?

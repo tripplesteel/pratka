@@ -61,6 +61,13 @@ module Pratka
         payment: :payment
       }.freeze
 
+      TRACK_ENDPOINT = "track"
+      TRACK_PARAMS = { parcels: :parcels, last_operation_only: :lastOperationOnly }.freeze
+
+      # Speedy recommends 10 parcels per request and plans to enforce it
+
+      TRACK_MAX_PARCELS = 10
+
       def initialize(username:, password:, language: nil, country_id: Speedy.configuration.country_id)
         @username = username
         @password = password
@@ -163,6 +170,19 @@ module Pratka
       # Returns one calculation per service id. Each calculation carries its own error if Speedy can't price that service
       def calculate(**options)
         call(CALCULATION_ENDPOINT, map_params(options, CALCULATION_PARAMS, required: %i[recipient service content payment]))
+      end
+
+      # Track parcels and return their operation history
+      # [Track Request (TrackRequest)](https://api.speedy.bg/api/docs/#href-track-req)
+      # Allowed params:
+      # parcels (Mandatory) - TrackShipmentParcelRef[] - Up to 10 parcels. Each needs one of id, ref, fullBarcode or externalCarrierParcelNumber
+      # last_operation_only - Boolean - Return only the latest operation per parcel. Default one is false
+      # Returns one tracked parcel per matched parcel. A ref can match up to 10. Each tracked parcel carries its own error if Speedy can't track it
+      def track(**options)
+        params = map_params(options, TRACK_PARAMS, required: [:parcels])
+        raise ArgumentError, "Speedy tracks at most #{TRACK_MAX_PARCELS} parcels per call" if params[:parcels].size > TRACK_MAX_PARCELS
+
+        call(TRACK_ENDPOINT, params)
       end
 
       private

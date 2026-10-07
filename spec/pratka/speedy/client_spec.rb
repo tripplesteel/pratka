@@ -216,4 +216,39 @@ RSpec.describe Pratka::Speedy::Client do
         .to raise_error(ArgumentError, "Unknown params: shipment_note")
     end
   end
+
+  describe "#track" do
+    let(:parcels) { [{ id: "299999990" }, { ref: "ORDER-1001" }] }
+
+    it "sends camelCase params to the track endpoint" do
+      client.track(parcels: parcels, last_operation_only: true)
+
+      expect(http).to have_received(:call).with("track", { parcels: parcels, lastOperationOnly: true })
+    end
+
+    it "returns the parsed response" do
+      response = { "parcels" => [{ "parcelId" => "299999990", "operations" => [{ "operationCode" => -14 }] }] }
+      allow(http).to receive(:call).and_return(response)
+
+      expect(client.track(parcels: parcels)).to eq(response)
+    end
+
+    it "requires parcels without calling Speedy", :aggregate_failures do
+      expect { client.track(parcels: []) }.to raise_error(ArgumentError, "Missing params: parcels")
+      expect(http).not_to have_received(:call)
+    end
+
+    it "rejects more than 10 parcels without calling Speedy", :aggregate_failures do
+      too_many = Array.new(11) { |i| { id: "29999999#{i}" } }
+
+      expect { client.track(parcels: too_many) }
+        .to raise_error(ArgumentError, "Speedy tracks at most 10 parcels per call")
+      expect(http).not_to have_received(:call)
+    end
+
+    it "rejects unknown params" do
+      expect { client.track(parcels: parcels, ref: "ORDER-1001") }
+        .to raise_error(ArgumentError, "Unknown params: ref")
+    end
+  end
 end

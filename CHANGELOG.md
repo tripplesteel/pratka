@@ -1,8 +1,12 @@
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-08
+
 ### Added
 
 - `fetch_shipment_info` returns full details of existing shipments
+
+[0.1.1]: https://github.com/tripplesteel/pratka/releases/tag/v0.1.1
 
 ## [0.1.0] - 2026-10-07
 
@@ -22,5 +26,4 @@ Initial release, with Speedy as the first supported courier.
 - Validation of required params, which treats blank values as missing
 - Supports Ruby 3.3+ and JRuby
 
-[Unreleased]: https://github.com/tripplesteel/pratka/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/tripplesteel/pratka/releases/tag/v0.1.0

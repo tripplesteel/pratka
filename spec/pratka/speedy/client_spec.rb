@@ -217,6 +217,33 @@ RSpec.describe Pratka::Speedy::Client do
     end
   end
 
+  describe "#fetch_shipment_info" do
+    let(:shipment_ids) { %w[299999990 299999991] }
+
+    it "sends camelCase params to the shipment info endpoint" do
+      client.fetch_shipment_info(shipment_ids: shipment_ids)
+
+      expect(http).to have_received(:call).with("shipment/info", { shipmentIds: shipment_ids })
+    end
+
+    it "returns the parsed response" do
+      response = { "shipments" => [{ "id" => "299999990", "ref1" => "ORDER-1001" }] }
+      allow(http).to receive(:call).and_return(response)
+
+      expect(client.fetch_shipment_info(shipment_ids: shipment_ids)).to eq(response)
+    end
+
+    it "requires shipment_ids without calling Speedy", :aggregate_failures do
+      expect { client.fetch_shipment_info(shipment_ids: []) }.to raise_error(ArgumentError, "Missing params: shipment_ids")
+      expect(http).not_to have_received(:call)
+    end
+
+    it "rejects unknown params" do
+      expect { client.fetch_shipment_info(shipment_ids: shipment_ids, parcels: []) }
+        .to raise_error(ArgumentError, "Unknown params: parcels")
+    end
+  end
+
   describe "#track" do
     let(:parcels) { [{ id: "299999990" }, { ref: "ORDER-1001" }] }
 

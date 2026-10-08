@@ -61,6 +61,9 @@ module Pratka
         payment: :payment
       }.freeze
 
+      SHIPMENT_INFO_ENDPOINT = "shipment/info"
+      SHIPMENT_INFO_PARAMS = { shipment_ids: :shipmentIds }.freeze
+
       TRACK_ENDPOINT = "track"
       TRACK_PARAMS = { parcels: :parcels, last_operation_only: :lastOperationOnly }.freeze
 
@@ -157,6 +160,15 @@ module Pratka
       # shipment_note - String - Customer’s note associated with the shipment
       def create_shipment(**options)
         call(CREATE_SHIPMENT_ENDPOINT, map_params(options, SHIPMENT_PARAMS, required: %i[recipient service content payment]))
+      end
+
+      # Fetch full details of existing shipments
+      # [Shipment Information Request (ShipmentInformationRequest)](https://api.speedy.bg/api/docs/#href-shipment-info-req)
+      # Allowed params:
+      # shipment_ids (Mandatory) - String[] - Shipment ids
+      # Returns one Shipment per id with its sender, recipient, service, content, payment, price and delivery
+      def fetch_shipment_info(**options)
+        call(SHIPMENT_INFO_ENDPOINT, map_params(options, SHIPMENT_INFO_PARAMS, required: [:shipment_ids]))
       end
 
       # Calculate shipment price and delivery deadline for one or more services

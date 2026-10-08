@@ -345,6 +345,30 @@ Example response:
 }
 ```
 
+#### Fetch shipment info
+
+```ruby
+client.fetch_shipment_info(shipment_ids: ["299999990", "299999991"])
+```
+
+Allowed options:
+- `shipment_ids` (Mandatory) - Array of shipment ids
+
+Returns the parsed JSON response with one [Shipment](https://api.speedy.bg/api/docs/#href-ds-shipment) per id. Each shipment has its sender, recipient, service, content, payment, price and delivery details, plus `ref1`, `ref2`, `returnShipmentId` and `redirectShipmentId` when set
+
+Example response:
+
+```ruby
+{"shipments" =>
+  [{"id" => "299999990",
+    "ref1" => "ORDER-1001",
+    "service" => {"serviceId" => 505, "pickupDate" => "2026-10-08"},
+    "content" => {"parcelsCount" => 1, "totalWeight" => 1.5, "contents" => "Books"},
+    "price" => {"amount" => 6.2, "vat" => 1.24, "total" => 7.44, "currency" => "BGN"},
+    "delivery" => {"deliveryDeadline" => "2026-10-09T19:00:00+0300"}}]
+}
+```
+
 #### Calculate
 
 ```ruby

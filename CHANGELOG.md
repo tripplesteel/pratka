@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- `fetch_shipment_info` returns full details of existing shipments
+
 ## [0.1.0] - 2026-10-07
 
 Initial release, with Speedy as the first supported courier.

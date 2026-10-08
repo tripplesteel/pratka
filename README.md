@@ -427,7 +427,7 @@ Returns the parsed JSON response with one tracked parcel per matched parcel. A `
 
 A parcel Speedy can't find comes back with its own `error` object instead of operations. `track` doesn't raise for it, so check each parcel
 
-Speedy asks clients to send at most 10 parcels per request and plans to enforce that limit. `track` enforces it already, so if you send more than 10 parcels it raises `ArgumentError` with the message `Speedy tracks at most 10 parcels per call`. Split larger lists into batches, for example with `each_slice(10)`
+Speedy enforces 10 parcels limit per request. If you send more than 10 parcels it raises `ArgumentError` with the message `Speedy tracks at most 10 parcels per call`. Split larger lists into batches, for example with `each_slice(10)`
 
 Example response:
 

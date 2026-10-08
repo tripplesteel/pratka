@@ -67,8 +67,7 @@ module Pratka
       TRACK_ENDPOINT = "track"
       TRACK_PARAMS = { parcels: :parcels, last_operation_only: :lastOperationOnly }.freeze
 
-      # Speedy recommends 10 parcels per request and plans to enforce it
-
+      # Speedy allows up to 10 parcels per request
       TRACK_MAX_PARCELS = 10
 
       def initialize(username:, password:, language: nil, country_id: Speedy.configuration.country_id)

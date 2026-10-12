@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Changed
+
+- Invalid params raise `Pratka::Speedy::InvalidParamsError` instead of `ArgumentError`, so `rescue Pratka::Error` covers every failure
+
 ## [0.1.1] - 2026-10-08
 
 ### Added

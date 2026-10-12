@@ -191,7 +191,7 @@ module Pratka
       # Returns one tracked parcel per matched parcel. A ref can match up to 10. Each tracked parcel carries its own error if Speedy can't track it
       def track(**options)
         params = map_params(options, TRACK_PARAMS, required: [:parcels])
-        raise ArgumentError, "Speedy tracks at most #{TRACK_MAX_PARCELS} parcels per call" if params[:parcels].size > TRACK_MAX_PARCELS
+        raise InvalidParamsError, "Speedy tracks at most #{TRACK_MAX_PARCELS} parcels per call" if params[:parcels].size > TRACK_MAX_PARCELS
 
         call(TRACK_ENDPOINT, params)
       end
@@ -204,10 +204,10 @@ module Pratka
 
       def map_params(options, mapping, required: [])
         unknown = options.keys - mapping.keys
-        raise ArgumentError, "Unknown params: #{unknown.join(", ")}" if unknown.any?
+        raise InvalidParamsError, "Unknown params: #{unknown.join(", ")}" if unknown.any?
 
         missing = required.select { |key| blank?(options[key]) }
-        raise ArgumentError, "Missing params: #{missing.join(", ")}" if missing.any?
+        raise InvalidParamsError, "Missing params: #{missing.join(", ")}" if missing.any?
 
         options.transform_keys(mapping)
       end

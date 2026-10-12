@@ -7,6 +7,7 @@ module Pratka
     class Error < Pratka::Error; end
     class TimeoutError < Error; end
     class ConnectionError < Error; end
+    class InvalidParamsError < Error; end
 
     class HTTPError < Error
       attr_reader :status, :body

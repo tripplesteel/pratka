@@ -26,20 +26,20 @@ RSpec.describe Pratka::Speedy::Client do
 
     it "rejects unknown params" do
       expect { client.fetch_offices(city: "Sofia") }
-        .to raise_error(ArgumentError, "Unknown params: city")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Unknown params: city")
     end
   end
 
   describe "#fetch_streets" do
     it "requires site_id" do
       expect { client.fetch_streets(name: "Vitosha") }
-        .to raise_error(ArgumentError, "Missing params: site_id")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Missing params: site_id")
     end
 
     it "treats blank values as missing", :aggregate_failures do
       ["", "  ", [], {}].each do |blank|
         expect { client.fetch_streets(site_id: blank) }
-          .to raise_error(ArgumentError, "Missing params: site_id")
+          .to raise_error(Pratka::Speedy::InvalidParamsError, "Missing params: site_id")
       end
     end
   end
@@ -95,7 +95,7 @@ RSpec.describe Pratka::Speedy::Client do
 
     it "rejects empty parcels without calling Speedy", :aggregate_failures do
       expect { client.print_label(paper_size: "A6", parcels: []) }
-        .to raise_error(ArgumentError, "Missing params: parcels")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Missing params: parcels")
       expect(http).not_to have_received(:call)
     end
   end
@@ -127,7 +127,7 @@ RSpec.describe Pratka::Speedy::Client do
 
     it "requires from_date and to_date without calling Speedy", :aggregate_failures do
       expect { client.fetch_payment_details(include_details: true) }
-        .to raise_error(ArgumentError, "Missing params: from_date, to_date")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Missing params: from_date, to_date")
       expect(http).not_to have_received(:call)
     end
   end
@@ -160,18 +160,18 @@ RSpec.describe Pratka::Speedy::Client do
 
     it "requires recipient, service, content and payment without calling Speedy", :aggregate_failures do
       expect { client.create_shipment(shipment_note: "Fragile") }
-        .to raise_error(ArgumentError, "Missing params: recipient, service, content, payment")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Missing params: recipient, service, content, payment")
       expect(http).not_to have_received(:call)
     end
 
     it "treats an empty nested hash as missing" do
       expect { client.create_shipment(**shipment, payment: {}) }
-        .to raise_error(ArgumentError, "Missing params: payment")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Missing params: payment")
     end
 
     it "rejects unknown params" do
       expect { client.create_shipment(**shipment, ref1: "ORDER-1001") }
-        .to raise_error(ArgumentError, "Unknown params: ref1")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Unknown params: ref1")
     end
   end
 
@@ -202,18 +202,18 @@ RSpec.describe Pratka::Speedy::Client do
 
     it "requires recipient, service, content and payment without calling Speedy", :aggregate_failures do
       expect { client.calculate(sender: { dropoffOfficeId: 1 }) }
-        .to raise_error(ArgumentError, "Missing params: recipient, service, content, payment")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Missing params: recipient, service, content, payment")
       expect(http).not_to have_received(:call)
     end
 
     it "treats an empty nested hash as missing" do
       expect { client.calculate(**calculation, service: {}) }
-        .to raise_error(ArgumentError, "Missing params: service")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Missing params: service")
     end
 
     it "rejects shipment-only params" do
       expect { client.calculate(**calculation, shipment_note: "Fragile") }
-        .to raise_error(ArgumentError, "Unknown params: shipment_note")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Unknown params: shipment_note")
     end
   end
 
@@ -234,13 +234,13 @@ RSpec.describe Pratka::Speedy::Client do
     end
 
     it "requires shipment_ids without calling Speedy", :aggregate_failures do
-      expect { client.fetch_shipment_info(shipment_ids: []) }.to raise_error(ArgumentError, "Missing params: shipment_ids")
+      expect { client.fetch_shipment_info(shipment_ids: []) }.to raise_error(Pratka::Speedy::InvalidParamsError, "Missing params: shipment_ids")
       expect(http).not_to have_received(:call)
     end
 
     it "rejects unknown params" do
       expect { client.fetch_shipment_info(shipment_ids: shipment_ids, parcels: []) }
-        .to raise_error(ArgumentError, "Unknown params: parcels")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Unknown params: parcels")
     end
   end
 
@@ -261,7 +261,7 @@ RSpec.describe Pratka::Speedy::Client do
     end
 
     it "requires parcels without calling Speedy", :aggregate_failures do
-      expect { client.track(parcels: []) }.to raise_error(ArgumentError, "Missing params: parcels")
+      expect { client.track(parcels: []) }.to raise_error(Pratka::Speedy::InvalidParamsError, "Missing params: parcels")
       expect(http).not_to have_received(:call)
     end
 
@@ -269,13 +269,13 @@ RSpec.describe Pratka::Speedy::Client do
       too_many = Array.new(11) { |i| { id: "29999999#{i}" } }
 
       expect { client.track(parcels: too_many) }
-        .to raise_error(ArgumentError, "Speedy tracks at most 10 parcels per call")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Speedy tracks at most 10 parcels per call")
       expect(http).not_to have_received(:call)
     end
 
     it "rejects unknown params" do
       expect { client.track(parcels: parcels, ref: "ORDER-1001") }
-        .to raise_error(ArgumentError, "Unknown params: ref")
+        .to raise_error(Pratka::Speedy::InvalidParamsError, "Unknown params: ref")
     end
   end
 end

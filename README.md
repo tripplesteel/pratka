@@ -258,7 +258,7 @@ Returns raw PDF or ZPL bytes if the request is successful and the parcel exists
 
 If the parcels don't exist in Speedy, `print_label` raises `Pratka::Speedy::Error` with the message `Speedy returned an empty label; check the parcel IDs`
 
-If you send empty parcels, `print_label` raises `ArgumentError` with the message `Missing params: parcels`
+If you send empty parcels, `print_label` raises `Pratka::Speedy::InvalidParamsError` with the message `Missing params: parcels`
 
 #### Fetch payment details
 
@@ -427,7 +427,7 @@ Returns the parsed JSON response with one tracked parcel per matched parcel. A `
 
 A parcel Speedy can't find comes back with its own `error` object instead of operations. `track` doesn't raise for it, so check each parcel
 
-Speedy enforces 10 parcels limit per request. If you send more than 10 parcels it raises `ArgumentError` with the message `Speedy tracks at most 10 parcels per call`. Split larger lists into batches, for example with `each_slice(10)`
+Speedy enforces 10 parcels limit per request. If you send more than 10 parcels it raises `Pratka::Speedy::InvalidParamsError` with the message `Speedy tracks at most 10 parcels per call`. Split larger lists into batches, for example with `each_slice(10)`
 
 Example response:
 
@@ -445,17 +445,16 @@ Example response:
 
 ### Errors
 
-Every network and API failure raises a subclass of `Pratka::Speedy::Error`, which inherits from `Pratka::Error`
+Every failure raises a subclass of `Pratka::Speedy::Error`, which inherits from `Pratka::Error`, so `rescue Pratka::Error` covers them all
 
 | Error | Raised when | Extra attributes |
 | --- | --- | --- |
+| `Pratka::Speedy::InvalidParamsError` | A param is unknown, missing or over a limit. Raised before any request is sent | |
 | `Pratka::Speedy::TimeoutError` | The connection or read times out | |
 | `Pratka::Speedy::ConnectionError` | DNS, socket or SSL failure | |
 | `Pratka::Speedy::HTTPError` | Speedy returns a non-2xx status | `status`, `body` |
 | `Pratka::Speedy::APIError` | Speedy returns 2xx with an `error` object in the body | `code`, `context`, `id` |
 | `Pratka::Speedy::Error` | The response is malformed, has invalid JSON, or has an unexpected format | |
-
-Bad arguments raise `ArgumentError` before any request is sent, for example an unknown option or a missing `site_id`
 
 ```ruby
 begin
